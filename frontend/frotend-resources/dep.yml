@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-deploy
+  labels:
+    app: react
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: react
+
+  template:
+    metadata:
+      labels:
+        app: react
+
+    spec:
+      containers:
+        - name: react-container
+          image: vishalkjadhav45/travell-frontend:v2
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 80
