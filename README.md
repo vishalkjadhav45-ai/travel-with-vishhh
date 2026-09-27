@@ -1,55 +1,63 @@
 # 🌍 Travel With Vishhh
 
-A full-stack travel enrollment and management application built using the MERN stack and deployed using Docker, Kubernetes and Helm.
+A full-stack travel booking application built using the MERN stack and deployed through a DevOps workflow using Docker, Kubernetes, Helm and Jenkins CI/CD.
 
-The project was taken from application development to a complete DevOps workflow including containerization, Kubernetes deployment, Helm packaging, code analysis, vulnerability scanning and Jenkins CI/CD automation.
+The project focuses on containerization, Kubernetes deployment, database persistence, code quality analysis and container vulnerability scanning.
 
 ---
 
 ## 🚀 Project Overview
 
-**Travel With Vishhh** is a travel enrollment and management application where users can select travel packages and submit traveler information such as:
+**Travel With Vishhh** is a MERN-based travel booking application where users can explore travel options and submit their travel details.
 
-- Name
-- Email
-- Phone
-- Destination
-- Travel Date
-- Number of Travelers
-- Package Price
-- Message
-
-The application uses a React frontend, Node.js/Express REST API and MongoDB database.
-
----
-
-## 🏗️ Application Architecture
+### Application Stack
 
 ```text
-                    React Frontend
-                          │
-                          ▼
-                   Nginx Reverse Proxy
-                          │
-                        /api/
-                          │
-                          ▼
-                  Node.js + Express API
-                          │
-                          ▼
-                  MongoDB ReplicaSet
-                   ┌──────┼──────┐
-                   ▼      ▼      ▼
-               mongodb-0 mongodb-1 mongodb-2
+React.js
+    ↓
+Node.js + Express
+    ↓
+MongoDB
+
+The application was containerized and then deployed on Kubernetes as part of the DevOps workflow.
+
+🏗️ DevOps Architecture
+                GitHub
+                   │
+                   ▼
+                Jenkins
+                   │
+        ┌──────────┼──────────┐
+        ▼          ▼          ▼
+   SonarQube      Docker     Trivy
+   Analysis       Build      Scan
+        │          │
+        └──────┬───┘
+               ▼
+           Docker Hub
+               │
+               ▼
+        Kubernetes Cluster
+               │
+       ┌───────┴────────┐
+       ▼                ▼
+   Frontend          Backend
+   React + Nginx     Node + Express
+       │                │
+       └───────┬────────┘
+               ▼
+            MongoDB
+          StatefulSet
+          3 Replicas
+          + PVC Storage
 🛠️ Technology Stack
 Application
 React.js
 Node.js
 Express.js
 MongoDB
-DevOps & Cloud
-Git
-GitHub
+DevOps
+Git & GitHub
 Docker
 Docker Hub
 Kubernetes
@@ -58,239 +66,150 @@ Jenkins
 SonarQube
 Trivy
 Nginx
-🐳 Docker Implementation
+🐳 Docker
 
-The frontend and backend are containerized separately.
-
-Backend
-   ↓
-Docker Image
-   ↓
-Docker Hub
+The application frontend and backend were containerized using separate Docker images.
 
 Frontend
-   ↓
-Multi-stage Docker Build
-   ↓
-Nginx Production Container
-   ↓
-Docker Hub
 
-The React frontend uses a multi-stage Docker build where the application is built using Node.js and the production build is served using Nginx.
+The React application uses a multi-stage Docker build:
 
-Nginx also acts as a reverse proxy for /api/ requests to the Kubernetes backend Service.
+Node.js Build Stage
+        ↓
+    npm install
+        ↓
+    npm run build
+        ↓
+   Production Build
+        ↓
+   Nginx Container
 
-☸️ Kubernetes Deployment
+Nginx is used to serve the production React application and handle API requests through reverse proxy configuration.
 
-The application is deployed as a 3-tier Kubernetes architecture.
+Backend
+
+The Node.js + Express application is packaged as a separate Docker image and used as the backend API service.
+
+☸️ Kubernetes
+
+The containerized application was deployed on Kubernetes using separate workloads for the frontend, backend and MongoDB.
 
 Frontend
-React.js application
-Nginx production server
-2 replicas
-LoadBalancer Service
-API reverse proxy through Nginx
+React application
+Nginx
+Kubernetes Deployment
+Service
 Backend
-Node.js + Express REST API
-2 replicas
-ClusterIP Service
-MongoDB connection configured using Kubernetes ConfigMap
-Database
-MongoDB 7
-StatefulSet with 3 replicas
-Persistent storage
-MongoDB ReplicaSet: rs0
-Headless Service
-Stable MongoDB pod DNS
-                  Kubernetes Cluster
-                         │
-        ┌────────────────┼────────────────┐
-        │                │                │
-        ▼                ▼                ▼
-    Frontend          Backend          MongoDB
-    2 Pods            2 Pods            3 Pods
-        │                │                │
-        └────────────────┼────────────────┘
-                         │
-                         ▼
-                  Travel Application
+Node.js + Express API
+Kubernetes Deployment
+Service
+MongoDB
+
+MongoDB was deployed using a StatefulSet with:
+
+3 replicas
+Persistent Volume Claims (PVC)
+Stable pod identities
+MongoDB ReplicaSet configuration
+MongoDB StatefulSet
+
+mongodb-0
+mongodb-1
+mongodb-2
+     │
+     ▼
+ MongoDB ReplicaSet
+
+Kubernetes Services were used for communication between the application tiers.
+
 ⎈ Helm
 
-The Kubernetes resources were also packaged using Helm.
+The Kubernetes deployment was also packaged using Helm.
 
-Helm is used to manage configurable deployment values such as:
+Helm was used to manage the Kubernetes deployment configuration and make values such as images and replica counts configurable.
 
-Container images
-Replica counts
-MongoDB storage
-Application ports
-MongoDB connection URI
-values.yaml
-     ↓
-Helm Templates
-     ↓
-Kubernetes Resources
-     ↓
-Kubernetes Cluster
-🔄 CI/CD Pipeline
+Helm Chart
+    ↓
+Kubernetes Templates
+    ↓
+Kubernetes Deployment
+🔄 Jenkins CI/CD
 
-Jenkins automates the application build, analysis, security scanning, image publishing and Kubernetes deployment process.
+A Jenkins pipeline was created to automate the application delivery workflow.
 
-Developer Push
-      ↓
+Pipeline Flow
 GitHub
-      ↓
+   ↓
 Jenkins Checkout
-      ↓
-Backend Test
-      ↓
-Frontend Build
-      ↓
+   ↓
 SonarQube Analysis
-      ↓
+   ↓
 Quality Gate
-      ↓
-Docker Image Build
-      ↓
-Trivy Vulnerability Scan
-      ↓
+   ↓
+Docker Build
+   ↓
+Trivy Image Scan
+   ↓
 Docker Hub Push
-      ↓
-Update Kubernetes Image Tags
-      ↓
-kubectl Apply
-      ↓
-Rollout Verification
-      ↓
-Live Application
-Pipeline Components
+   ↓
+Kubernetes Deployment
+   ↓
+Application Running
 
-Jenkins
+The pipeline performs code analysis using SonarQube, scans the generated Docker images using Trivy, publishes the images to Docker Hub and deploys the updated application to Kubernetes.
 
-Automates the CI/CD workflow
-Builds and deploys the application
+🔍 SonarQube
 
-SonarQube
+SonarQube was integrated into the Jenkins pipeline to analyze the application source code for code quality and security-related issues.
 
-Performs source-code analysis
-Checks code quality and security-related issues
-Uses a Quality Gate before continuing the pipeline
+The analysis covers the application source code before the Docker images are built.
 
-Trivy
+🛡️ Trivy
 
-Scans Docker images for vulnerabilities
+Trivy was integrated into the CI/CD pipeline to scan the generated Docker images for container vulnerabilities before pushing them to Docker Hub.
 
-Docker Hub
-
-Stores the backend and frontend Docker images
-
-Kubernetes
-
-Runs and manages the application workloads
-📸 Project Screenshots
+📸 Project Evidence
 🌍 Live Application
 
-The live Travel With Vishhh application running from the Kubernetes deployment.
+The deployed Travel With Vishhh application.
 
 🔄 Jenkins CI/CD Pipeline
 
-Jenkins pipeline showing the automated build, analysis, Docker, security scanning and Kubernetes deployment stages.
+Jenkins pipeline showing the automated CI/CD workflow.
 
 🔍 SonarQube Analysis
 
-SonarQube analysis of the Travel With Vishhh project.
+SonarQube analysis performed as part of the CI/CD pipeline.
 
 📁 Project Structure
 travel-app/
 │
 ├── backend/
-│   ├── Dockerfile
-│   ├── package.json
-│   └── src/
+│   └── Node.js + Express application
 │
 ├── frontend/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── package.json
-│   └── src/
+│   └── React application
 │
-├── k8s/
-│   ├── mongo-sts.yml
-│   ├── mongo-svc.yml
-│   ├── node-config.yml
-│   ├── node-dep.yml
-│   ├── node-svc.yml
-│   ├── react-dep.yml
-│   └── react-svc.yml
+├── sts/
+│   └── Kubernetes deployment configuration
 │
-├── helm-travel-app/
-│   ├── Chart.yaml
-│   ├── values.yaml
-│   └── templates/
-│
-├── screenshots/
-│   ├── live-app.png
-│   ├── jenkins-pipeline.png
-│   └── sonarqube.png
-│
-├── Jenkinsfile
-├── sonar-project.properties
 └── README.md
-▶️ Run Locally
-Clone the Repository
-git clone <YOUR_GITHUB_REPOSITORY>
-cd travel-app
-Backend
-cd backend
-npm install
-npm start
-Frontend
-cd frontend
-npm install
-npm run dev
-☸️ Kubernetes Deployment
-
-Apply the Kubernetes resources:
-
-kubectl apply -f k8s/
-
-Check the resources:
-
-kubectl get pods
-kubectl get svc
-kubectl get sts
-⎈ Helm Deployment
-
-Install the Helm chart:
-
-helm install travel-app ./helm-travel-app
-
-Check the deployment:
-
-helm list
-kubectl get pods
-kubectl get svc
-🎯 Key DevOps Work
-Developed a full-stack MERN travel application
+🎯 Key DevOps Implementation
+Built a full-stack MERN travel booking application
 Containerized frontend and backend using Docker
-Implemented a production-style Nginx frontend container
-Designed a 3-tier Kubernetes architecture
-Deployed MongoDB using StatefulSet and ReplicaSet
-Configured persistent storage and Kubernetes service discovery
-Used ConfigMaps for application configuration
-Packaged Kubernetes resources using Helm
-Implemented Jenkins CI/CD automation
-Integrated SonarQube for code analysis
-Integrated Trivy for container vulnerability scanning
-Published application images to Docker Hub
-Automated Kubernetes deployment and rollout verification
+Used a multi-stage Dockerfile for the React frontend
+Configured Nginx as a production reverse proxy
+Deployed the application on Kubernetes
+Configured a 3-node MongoDB StatefulSet with persistent storage
+Configured MongoDB ReplicaSet
+Packaged Kubernetes deployment using Helm
+Created Jenkins CI/CD pipeline
+Integrated SonarQube code analysis
+Integrated Trivy container image scanning
+Published Docker images to Docker Hub
+Automated Kubernetes deployment through Jenkins
 👨‍💻 Author
 
 Vishal K Jadhav
 
 DevOps / Cloud Engineering Learner
-
-GitHub: vishalkjadhav45-ai
-
-
-**That's the complete README.** Just create `README.md` → click **Copy** on the block → paste → save → push to GitHub.
